@@ -1,0 +1,55 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+
+  tasks:
+
+  - name: MONGO add apt repo
+    apt_key:
+      keyserver: hkp://keyserver.ubuntu.com:80
+      id: EA312927
+
+
+  - name: MONGO add list file
+    lineinfile:
+      dest: /etc/apt/sources.list.d/mongodb-org-3.2.list
+      line: "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse"
+      create: yes
+
+  - name: MONGO install
+    apt:
+      name: mongodb-org
+      update_cache: yes
+
+  - name: MONGO edit conf file
+    lineinfile:
+      dest: /etc/mongod.conf
+      regexp: "  bindIp: 127.0.0.1"
+      line: "  bindIp: 192.168.50.4"
+
+  - name: Restart mongo
+    service:
+      name: mongod
+      state: restarted
+
+  - name: NODE install repo
+    apt_key:
+      url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+
+  - name: NODE install apt-list
+    lineinfile:
+      dest: /etc/apt/sources.list.d/nodesource.list
+      line: "deb https://deb.nodesource.com/node_5.x trusty main"
+      create: yes
+
+  - name: NODE install src-list
+    lineinfile:
+      dest: /etc/apt/sources.list.d/nodesource.list
+      line: "deb-src https://deb.nodesource.com/node_5.x trusty main"
+
+  - name: NODE install
+    apt:
+      name: nodejs
+      update_cache: yes
